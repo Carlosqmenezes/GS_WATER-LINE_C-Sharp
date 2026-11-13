@@ -2,10 +2,10 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using WaterLine.Api.Configuracao;
 using WaterLine.Api.Dados;
 using WaterLine.Api.Dados.Seed;
 using WaterLine.Api.Erros;
-using WaterLine.Api.Servicos;
 
 // Ponto de entrada da API WaterLine.
 var builder = WebApplication.CreateBuilder(args);
@@ -20,8 +20,9 @@ if (string.IsNullOrWhiteSpace(connectionString))
 
 builder.Services.AddDbContext<WaterLineDbContext>(options => options.UseNpgsql(connectionString));
 
-// ---------- Serviços de aplicação ----------
-builder.Services.AddScoped<IBocaDeLoboAppService, BocaDeLoboAppService>();
+// ---------- Regras de negócio e serviços de aplicação ----------
+builder.Services.AddRegrasDeNegocio(builder.Configuration);
+builder.Services.AddServicosDeAplicacao();
 
 // ---------- Web API ----------
 builder.Services
