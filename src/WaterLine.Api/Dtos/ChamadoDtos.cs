@@ -10,7 +10,7 @@ namespace WaterLine.Api.Dtos;
 public sealed record AceitarChamadoRequest
 {
     [Required(ErrorMessage = "O id do agente é obrigatório.")]
-    [Range(1, int.MaxValue)]
+    [Range(1, int.MaxValue, ErrorMessage = MensagensValidacao.Intervalo)]
     public int? AgenteId { get; init; }
 }
 
@@ -19,7 +19,7 @@ public sealed class ConcluirChamadoRequest
 {
     /// <summary>Id do agente que aceitou o chamado.</summary>
     [Required(ErrorMessage = "O id do agente é obrigatório.")]
-    [Range(1, int.MaxValue)]
+    [Range(1, int.MaxValue, ErrorMessage = MensagensValidacao.Intervalo)]
     [FromForm(Name = "agenteId")]
     public int? AgenteId { get; set; }
 

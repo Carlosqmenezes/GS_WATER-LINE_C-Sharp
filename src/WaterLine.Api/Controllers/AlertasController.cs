@@ -28,9 +28,9 @@ public sealed class AlertasController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<AlertaResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<IReadOnlyList<AlertaResponse>>> Listar(
-        [FromQuery, Range(1, int.MaxValue)] int? bocaDeLoboId,
+        [FromQuery, Range(1, int.MaxValue, ErrorMessage = MensagensValidacao.Intervalo)] int? bocaDeLoboId,
         [FromQuery] NivelAlerta? nivel,
-        [FromQuery, Range(1, 200)] int limite = 50,
+        [FromQuery, Range(1, 200, ErrorMessage = MensagensValidacao.Intervalo)] int limite = 50,
         CancellationToken cancellationToken = default)
     {
         return Ok(await _service.ListarAsync(bocaDeLoboId, nivel, limite, cancellationToken));

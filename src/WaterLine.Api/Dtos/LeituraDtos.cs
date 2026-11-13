@@ -7,7 +7,7 @@ namespace WaterLine.Api.Dtos;
 public sealed record LeituraRequest
 {
     [Required(ErrorMessage = "O id da boca de lobo é obrigatório.")]
-    [Range(1, int.MaxValue)]
+    [Range(1, int.MaxValue, ErrorMessage = MensagensValidacao.Intervalo)]
     public int? BocaDeLoboId { get; init; }
 
     /// <summary>Momento da medição (ISO 8601 com fuso). Se omitido, usa a hora do servidor.</summary>
@@ -15,12 +15,12 @@ public sealed record LeituraRequest
 
     /// <summary>Distância medida pelo sensor externo (horizontal, atravessando a abertura), em cm.</summary>
     [Required(ErrorMessage = "A distância externa é obrigatória.")]
-    [Range(0.0, 1000.0)]
+    [Range(0.0, 1000.0, ErrorMessage = MensagensValidacao.Intervalo)]
     public double? DistanciaExternaCm { get; init; }
 
     /// <summary>Distância da tampa até a superfície (água ou sedimento), em cm.</summary>
     [Required(ErrorMessage = "A distância interna é obrigatória.")]
-    [Range(0.0, 1000.0)]
+    [Range(0.0, 1000.0, ErrorMessage = MensagensValidacao.Intervalo)]
     public double? DistanciaInternaCm { get; init; }
 
     /// <summary>Indicador de chuva do dispositivo.</summary>

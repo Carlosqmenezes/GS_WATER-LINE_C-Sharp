@@ -11,11 +11,11 @@ public sealed record AlterarServicoRequest : IValidatableObject
     public bool? EmServico { get; init; }
 
     /// <summary>Obrigatória ao entrar em serviço. Ignorada ao sair.</summary>
-    [Range(-90.0, 90.0)]
+    [Range(-90.0, 90.0, ErrorMessage = MensagensValidacao.Intervalo)]
     public double? Latitude { get; init; }
 
     /// <summary>Obrigatória ao entrar em serviço. Ignorada ao sair.</summary>
-    [Range(-180.0, 180.0)]
+    [Range(-180.0, 180.0, ErrorMessage = MensagensValidacao.Intervalo)]
     public double? Longitude { get; init; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

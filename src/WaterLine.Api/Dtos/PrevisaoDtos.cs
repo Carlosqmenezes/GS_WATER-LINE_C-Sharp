@@ -11,12 +11,12 @@ public sealed record PrevisaoRequest
 
     /// <summary>Horizonte da previsão, em horas (ex.: 3 ou 6).</summary>
     [Required(ErrorMessage = "O horizonte em horas é obrigatório.")]
-    [Range(PrevisaoChuva.HorizonteMinimoHoras, PrevisaoChuva.HorizonteMaximoHoras)]
+    [Range(PrevisaoChuva.HorizonteMinimoHoras, PrevisaoChuva.HorizonteMaximoHoras, ErrorMessage = MensagensValidacao.Intervalo)]
     public int? HorizonteHoras { get; init; }
 
     /// <summary>Probabilidade de chuva forte, de 0 a 1.</summary>
     [Required(ErrorMessage = "A probabilidade é obrigatória.")]
-    [Range(0.0, 1.0)]
+    [Range(0.0, 1.0, ErrorMessage = MensagensValidacao.Intervalo)]
     public double? Probabilidade { get; init; }
 
     /// <summary>Decisão do modelo: true quando prevê chuva forte no horizonte.</summary>

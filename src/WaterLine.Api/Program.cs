@@ -68,7 +68,16 @@ if (app.Configuration.GetValue("Seed:Habilitado", false))
     await using var escopo = app.Services.CreateAsyncScope();
     var db = escopo.ServiceProvider.GetRequiredService<WaterLineDbContext>();
     var logger = escopo.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Seed");
-    await SeedDados.ExecutarAsync(db, logger);
+
+    try
+    {
+        await SeedDados.ExecutarAsync(db, logger);
+    }
+    catch (Exception ex) when (ex is Npgsql.NpgsqlException or InvalidOperationException or TimeoutException)
+    {
+        // A API sobe mesmo sem banco (o Swagger continua acessível); as rotas que usam o banco responderão 500.
+        logger.LogError(ex, "Não foi possível conectar ao PostgreSQL para o seed. Suba o banco com 'docker compose up -d' (veja o README).");
+    }
 }
 
 app.MapControllers();

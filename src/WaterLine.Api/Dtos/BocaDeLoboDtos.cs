@@ -9,30 +9,30 @@ public sealed record BocaDeLoboRequest
 {
     /// <summary>Código de campo, único (ex.: BL-0006).</summary>
     [Required(ErrorMessage = "O código é obrigatório.")]
-    [StringLength(BocaDeLobo.TamanhoMaximoCodigo, MinimumLength = 3)]
+    [StringLength(BocaDeLobo.TamanhoMaximoCodigo, MinimumLength = 3, ErrorMessage = MensagensValidacao.Tamanho)]
     public string Codigo { get; init; } = string.Empty;
 
     /// <summary>Endereço de referência (fictício na demonstração).</summary>
     [Required(ErrorMessage = "O endereço é obrigatório.")]
-    [StringLength(BocaDeLobo.TamanhoMaximoEndereco, MinimumLength = 5)]
+    [StringLength(BocaDeLobo.TamanhoMaximoEndereco, MinimumLength = 5, ErrorMessage = MensagensValidacao.Tamanho)]
     public string Endereco { get; init; } = string.Empty;
 
     [Required(ErrorMessage = "A latitude é obrigatória.")]
-    [Range(-90.0, 90.0)]
+    [Range(-90.0, 90.0, ErrorMessage = MensagensValidacao.Intervalo)]
     public double? Latitude { get; init; }
 
     [Required(ErrorMessage = "A longitude é obrigatória.")]
-    [Range(-180.0, 180.0)]
+    [Range(-180.0, 180.0, ErrorMessage = MensagensValidacao.Intervalo)]
     public double? Longitude { get; init; }
 
     /// <summary>Distância da tampa até o fundo da caixa, em cm.</summary>
     [Required(ErrorMessage = "A profundidade é obrigatória.")]
-    [Range(10.0, 1000.0)]
+    [Range(10.0, 1000.0, ErrorMessage = MensagensValidacao.Intervalo)]
     public double? ProfundidadeCm { get; init; }
 
     /// <summary>Largura da abertura atravessada pelo sensor externo, em cm.</summary>
     [Required(ErrorMessage = "A largura da abertura é obrigatória.")]
-    [Range(5.0, 500.0)]
+    [Range(5.0, 500.0, ErrorMessage = MensagensValidacao.Intervalo)]
     public double? LarguraAberturaCm { get; init; }
 
     /// <summary>Usado só na atualização: permite reativar ou desativar a boca de lobo.</summary>

@@ -29,8 +29,8 @@ public sealed class ChamadosController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<ChamadoProximoResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<IReadOnlyList<ChamadoProximoResponse>>> ListarProximos(
-        [FromQuery, Required, Range(-90.0, 90.0)] double? lat,
-        [FromQuery, Required, Range(-180.0, 180.0)] double? lng,
+        [FromQuery, Required(ErrorMessage = MensagensValidacao.Obrigatorio), Range(-90.0, 90.0, ErrorMessage = MensagensValidacao.Intervalo)] double? lat,
+        [FromQuery, Required(ErrorMessage = MensagensValidacao.Obrigatorio), Range(-180.0, 180.0, ErrorMessage = MensagensValidacao.Intervalo)] double? lng,
         CancellationToken cancellationToken)
     {
         return Ok(await _service.ListarProximosAsync(lat!.Value, lng!.Value, cancellationToken));
