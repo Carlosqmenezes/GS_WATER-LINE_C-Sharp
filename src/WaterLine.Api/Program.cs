@@ -1,10 +1,16 @@
+using System.Reflection;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using WaterLine.Api.Dados;
 using WaterLine.Api.Dados.Seed;
+using WaterLine.Api.Erros;
+using WaterLine.Api.Servicos;
 
 // Ponto de entrada da API WaterLine.
 var builder = WebApplication.CreateBuilder(args);
 
+// ---------- Banco de dados ----------
 var connectionString = builder.Configuration.GetConnectionString("WaterLine");
 if (string.IsNullOrWhiteSpace(connectionString))
 {
@@ -14,11 +20,48 @@ if (string.IsNullOrWhiteSpace(connectionString))
 
 builder.Services.AddDbContext<WaterLineDbContext>(options => options.UseNpgsql(connectionString));
 
-builder.Services.AddControllers();
+// ---------- Serviços de aplicação ----------
+builder.Services.AddScoped<IBocaDeLoboAppService, BocaDeLoboAppService>();
+
+// ---------- Web API ----------
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<TratamentoErrosHandler>();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "WaterLine API",
+        Version = "v1",
+        Description = "API principal do WaterLine: recebe leituras das bocas de lobo, diagnostica, " +
+                      "abre chamados, despacha o agente certo mais próximo e gera alertas."
+    });
+
+    var arquivoXml = Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
+    options.IncludeXmlComments(arquivoXml);
+});
 
 var app = builder.Build();
 
-if (builder.Configuration.GetValue("Seed:Habilitado", false))
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
+if (app.Configuration.GetValue("Swagger:Habilitado", true))
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "WaterLine API v1");
+        options.DocumentTitle = "WaterLine API";
+    });
+}
+
+if (app.Configuration.GetValue("Seed:Habilitado", false))
 {
     await using var escopo = app.Services.CreateAsyncScope();
     var db = escopo.ServiceProvider.GetRequiredService<WaterLineDbContext>();
