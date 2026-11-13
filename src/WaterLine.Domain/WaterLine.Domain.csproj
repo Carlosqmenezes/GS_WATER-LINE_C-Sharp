@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Camada de domínio: entidades, enums, interfaces e regras de negócio.
+       Não depende de banco, de HTTP nem de bibliotecas externas. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>WaterLine.Domain</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Permite que os testes definam o Id das entidades sem expor um setter público. -->
+    <InternalsVisibleTo Include="WaterLine.Tests" />
+  </ItemGroup>
+
+</Project>

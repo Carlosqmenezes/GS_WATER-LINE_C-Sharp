@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- Camada de apresentação e infraestrutura: controllers, DTOs, EF Core e integrações. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>WaterLine.Api</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Gera o XML de documentação usado pelo Swagger para descrever cada endpoint. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- CS1591: não exige comentário XML em todo membro público (ex.: classes geradas das migrations). -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WaterLine.Domain\WaterLine.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

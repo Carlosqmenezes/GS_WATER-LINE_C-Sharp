@@ -1,0 +1,4 @@
+# Normaliza fins de linha no repositório; o Visual Studio usa CRLF na solução.
+* text=auto
+*.sln text eol=crlf
+*.sh text eol=lf
