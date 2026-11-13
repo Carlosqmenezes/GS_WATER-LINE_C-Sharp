@@ -44,14 +44,7 @@ public sealed class DespachoAppService : IDespachoAppService
 
         var designacoes = _despacho.Despachar(chamados, agentesEmServico);
 
-        foreach (var designacao in designacoes)
-        {
-            // Privacidade: o log registra só ids, nunca a localização ou a matrícula do agente.
-            _logger.LogInformation(
-                "Chamado {ChamadoId} designado ao agente {AgenteId}.",
-                designacao.Chamado.Id, designacao.Agente.Id);
-        }
-
+        // Os chamados novos ainda não têm Id aqui; quem chama registra as designações depois do SaveChanges.
         var semAgente = chamados.Count(c => c.Chamado.AgenteId is null);
         if (semAgente > 0)
         {

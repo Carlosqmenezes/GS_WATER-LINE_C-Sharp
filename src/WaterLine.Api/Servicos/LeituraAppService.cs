@@ -111,9 +111,10 @@ public sealed class LeituraAppService : ILeituraAppService
 
         if (novoChamado is not null)
         {
+            // Privacidade: só ids no log, nunca a localização ou a matrícula do agente.
             _logger.LogInformation(
-                "Chamado {ChamadoId} ({Tipo}) aberto para a boca de lobo {BocaId}.",
-                novoChamado.Id, novoChamado.Tipo, boca.Id);
+                "Chamado {ChamadoId} ({Tipo}) aberto para a boca de lobo {BocaId}; agente designado: {AgenteId}.",
+                novoChamado.Id, novoChamado.Tipo, boca.Id, novoChamado.AgenteId?.ToString() ?? "nenhum no raio");
         }
 
         return new LeituraProcessadaResponse

@@ -22,10 +22,12 @@ public static class InjecaoDependencia
 
         AdicionarOpcoes<RegrasDiagnosticoOptions>(services, configuration, RegrasDiagnosticoOptions.Secao);
         AdicionarOpcoes<RegrasDespachoOptions>(services, configuration, RegrasDespachoOptions.Secao);
+        AdicionarOpcoes<RegrasPrevencaoOptions>(services, configuration, RegrasPrevencaoOptions.Secao);
 
         services.AddSingleton<IDiagnosticoService, DiagnosticoService>();
         services.AddSingleton<IAberturaChamadoService, AberturaChamadoService>();
         services.AddSingleton<IDespachoService, DespachoService>();
+        services.AddSingleton<IPrevencaoService, PrevencaoService>();
 
         return services;
     }
@@ -47,6 +49,7 @@ public static class InjecaoDependencia
         services.AddScoped<IDespachoAppService, DespachoAppService>();
         services.AddScoped<IChamadoAppService, ChamadoAppService>();
         services.AddScoped<IAgenteAppService, AgenteAppService>();
+        services.AddScoped<IPrevisaoAppService, PrevisaoAppService>();
 
         return services;
     }
