@@ -1,2 +1,26 @@
-# Preenchido na etapa 3 (serviço do PostgreSQL).
-services: {}
+# Banco de dados do WaterLine para desenvolvimento local.
+# Subir:   docker compose up -d
+# Parar:   docker compose down        (os dados ficam no volume)
+# Zerar:   docker compose down -v     (apaga o volume e os dados)
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: waterline-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: waterline
+      POSTGRES_USER: waterline
+      # Senha só para desenvolvimento local. Em produção, use variável de ambiente ou cofre de segredos.
+      POSTGRES_PASSWORD: waterline_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - waterline-dados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U waterline -d waterline"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  waterline-dados:
