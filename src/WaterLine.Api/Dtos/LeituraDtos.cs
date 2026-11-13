@@ -55,4 +55,13 @@ public sealed record LeituraProcessadaResponse
 
     /// <summary>Agente designado para o chamado aberto (null se ninguém do tipo certo estava no raio).</summary>
     public int? AgenteDesignadoId { get; init; }
+
+    /// <summary>Chamados de gari cancelados por segurança porque está chovendo.</summary>
+    public IReadOnlyList<int> ChamadosCanceladosIds { get; init; } = Array.Empty<int>();
+
+    /// <summary>Alerta registrado por esta leitura (água subindo ou nível crítico), se houver.</summary>
+    public int? AlertaId { get; init; }
+
+    /// <summary>Se o alerta foi aceito pelo serviço externo (null quando não houve alerta).</summary>
+    public bool? AlertaEnviado { get; init; }
 }

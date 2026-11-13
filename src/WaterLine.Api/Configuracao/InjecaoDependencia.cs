@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using WaterLine.Api.Armazenamento;
+using WaterLine.Api.Integracoes;
 using WaterLine.Api.Servicos;
 using WaterLine.Domain.Configuracoes;
 using WaterLine.Domain.Interfaces;
@@ -28,15 +29,33 @@ public static class InjecaoDependencia
         services.AddSingleton<IAberturaChamadoService, AberturaChamadoService>();
         services.AddSingleton<IDespachoService, DespachoService>();
         services.AddSingleton<IPrevencaoService, PrevencaoService>();
+        services.AddSingleton<ISegurancaTrabalhadorService, SegurancaTrabalhadorService>();
 
         return services;
     }
 
-    /// <summary>Integrações de infraestrutura: armazenamento das fotos.</summary>
+    /// <summary>Integrações de infraestrutura: armazenamento das fotos e serviço externo de alertas.</summary>
     public static IServiceCollection AddInfraestrutura(this IServiceCollection services, IConfiguration configuration)
     {
         AdicionarOpcoes<ArmazenamentoFotosOptions>(services, configuration, ArmazenamentoFotosOptions.Secao);
         services.AddSingleton<IArmazenamentoFotos, ArmazenamentoFotosLocal>();
+
+        AdicionarOpcoes<AlertasOptions>(services, configuration, AlertasOptions.Secao);
+        var opcoesAlertas = configuration.GetSection(AlertasOptions.Secao).Get<AlertasOptions>() ?? new AlertasOptions();
+
+        if (opcoesAlertas.UsaServicoExterno)
+        {
+            // Typed HttpClient: o IHttpClientFactory gerencia as conexões; timeout curto para não travar a leitura.
+            services.AddHttpClient<IAlertaClient, HttpAlertaClient>(cliente =>
+            {
+                cliente.BaseAddress = new Uri(opcoesAlertas.BaseUrl!.TrimEnd('/') + "/");
+                cliente.Timeout = TimeSpan.FromSeconds(opcoesAlertas.TimeoutSegundos);
+            });
+        }
+        else
+        {
+            services.AddSingleton<IAlertaClient, LogAlertaClient>();
+        }
 
         return services;
     }
@@ -50,6 +69,7 @@ public static class InjecaoDependencia
         services.AddScoped<IChamadoAppService, ChamadoAppService>();
         services.AddScoped<IAgenteAppService, AgenteAppService>();
         services.AddScoped<IPrevisaoAppService, PrevisaoAppService>();
+        services.AddScoped<IAlertaAppService, AlertaAppService>();
 
         return services;
     }
