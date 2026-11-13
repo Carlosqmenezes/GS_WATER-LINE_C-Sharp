@@ -22,6 +22,7 @@ builder.Services.AddDbContext<WaterLineDbContext>(options => options.UseNpgsql(c
 
 // ---------- Regras de negócio e serviços de aplicação ----------
 builder.Services.AddRegrasDeNegocio(builder.Configuration);
+builder.Services.AddInfraestrutura(builder.Configuration);
 builder.Services.AddServicosDeAplicacao();
 
 // ---------- Web API ----------

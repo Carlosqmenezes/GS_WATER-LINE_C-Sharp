@@ -19,6 +19,10 @@ public class ChamadoConfiguration : IEntityTypeConfiguration<Chamado>
         builder.Ignore(c => c.EstaAtivo);
         builder.Ignore(c => c.EhDeGari);
 
+        // Concorrência otimista com a coluna de sistema xmin do PostgreSQL: se dois agentes
+        // aceitarem o mesmo chamado ao mesmo tempo, o segundo recebe HTTP 409.
+        builder.Property<uint>("Versao").IsRowVersion();
+
         // Consultas mais frequentes: chamados ativos de uma boca de lobo e chamados por status.
         builder.HasIndex(c => new { c.BocaDeLoboId, c.Status });
         builder.HasIndex(c => c.Status);

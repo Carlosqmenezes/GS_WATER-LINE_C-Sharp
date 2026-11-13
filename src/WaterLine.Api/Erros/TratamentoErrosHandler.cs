@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WaterLine.Domain.Excecoes;
 
 namespace WaterLine.Api.Erros;
@@ -26,6 +27,9 @@ public sealed class TratamentoErrosHandler : IExceptionHandler
             RecursoNaoEncontradoException e => (StatusCodes.Status404NotFound, "Recurso não encontrado", e.Message),
             ConflitoException e => (StatusCodes.Status409Conflict, "Conflito com o estado atual", e.Message),
             RegraNegocioException e => (StatusCodes.Status422UnprocessableEntity, "Regra de negócio violada", e.Message),
+            DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, "Conflito de concorrência",
+                "O registro foi alterado por outra operação ao mesmo tempo. Recarregue e tente novamente."),
+            BadHttpRequestException e => (e.StatusCode, "Requisição inválida", e.Message),
             ArgumentException e => (StatusCodes.Status400BadRequest, "Dados inválidos", e.Message),
             OperationCanceledException => (499, "Requisição cancelada", "A requisição foi cancelada pelo cliente."),
             _ => (StatusCodes.Status500InternalServerError, "Erro interno", "Ocorreu um erro inesperado. Tente novamente mais tarde.")

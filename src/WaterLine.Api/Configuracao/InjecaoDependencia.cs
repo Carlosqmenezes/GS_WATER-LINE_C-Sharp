@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using WaterLine.Api.Armazenamento;
 using WaterLine.Api.Servicos;
 using WaterLine.Domain.Configuracoes;
 using WaterLine.Domain.Interfaces;
@@ -25,6 +26,15 @@ public static class InjecaoDependencia
         services.AddSingleton<IDiagnosticoService, DiagnosticoService>();
         services.AddSingleton<IAberturaChamadoService, AberturaChamadoService>();
         services.AddSingleton<IDespachoService, DespachoService>();
+
+        return services;
+    }
+
+    /// <summary>Integrações de infraestrutura: armazenamento das fotos.</summary>
+    public static IServiceCollection AddInfraestrutura(this IServiceCollection services, IConfiguration configuration)
+    {
+        AdicionarOpcoes<ArmazenamentoFotosOptions>(services, configuration, ArmazenamentoFotosOptions.Secao);
+        services.AddSingleton<IArmazenamentoFotos, ArmazenamentoFotosLocal>();
 
         return services;
     }

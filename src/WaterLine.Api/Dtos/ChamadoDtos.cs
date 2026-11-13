@@ -1,8 +1,36 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 using WaterLine.Domain.Entidades;
 using WaterLine.Domain.Enums;
 using WaterLine.Domain.Servicos;
 
 namespace WaterLine.Api.Dtos;
+
+/// <summary>Agente que está aceitando o chamado.</summary>
+public sealed record AceitarChamadoRequest
+{
+    [Required(ErrorMessage = "O id do agente é obrigatório.")]
+    [Range(1, int.MaxValue)]
+    public int? AgenteId { get; init; }
+}
+
+/// <summary>Conclusão do chamado (multipart/form-data) com as fotos de antes e de depois.</summary>
+public sealed class ConcluirChamadoRequest
+{
+    /// <summary>Id do agente que aceitou o chamado.</summary>
+    [Required(ErrorMessage = "O id do agente é obrigatório.")]
+    [Range(1, int.MaxValue)]
+    [FromForm(Name = "agenteId")]
+    public int? AgenteId { get; set; }
+
+    /// <summary>Foto tirada antes da limpeza (JPEG, PNG ou WebP).</summary>
+    [FromForm(Name = "fotoAntes")]
+    public IFormFile? FotoAntes { get; set; }
+
+    /// <summary>Foto tirada depois da limpeza (JPEG, PNG ou WebP).</summary>
+    [FromForm(Name = "fotoDepois")]
+    public IFormFile? FotoDepois { get; set; }
+}
 
 /// <summary>Chamado devolvido pela API.</summary>
 public sealed record ChamadoResponse
