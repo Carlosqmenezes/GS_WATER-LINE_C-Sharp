@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using WaterLine.Api.Dados;
+using WaterLine.Api.Dados.Seed;
 
 // Ponto de entrada da API WaterLine.
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,14 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+if (builder.Configuration.GetValue("Seed:Habilitado", false))
+{
+    await using var escopo = app.Services.CreateAsyncScope();
+    var db = escopo.ServiceProvider.GetRequiredService<WaterLineDbContext>();
+    var logger = escopo.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Seed");
+    await SeedDados.ExecutarAsync(db, logger);
+}
+
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
