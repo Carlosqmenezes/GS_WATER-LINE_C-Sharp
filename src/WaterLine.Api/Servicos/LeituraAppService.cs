@@ -6,6 +6,7 @@ using WaterLine.Domain.Entidades;
 using WaterLine.Domain.Enums;
 using WaterLine.Domain.Excecoes;
 using WaterLine.Domain.Interfaces;
+using WaterLine.Domain.Servicos;
 
 namespace WaterLine.Api.Servicos;
 
@@ -28,6 +29,7 @@ public sealed class LeituraAppService : ILeituraAppService
     private readonly WaterLineDbContext _db;
     private readonly IDiagnosticoService _diagnostico;
     private readonly IAberturaChamadoService _aberturaChamado;
+    private readonly IDespachoAppService _despacho;
     private readonly RegrasDiagnosticoOptions _regrasDiagnostico;
     private readonly TimeProvider _relogio;
     private readonly ILogger<LeituraAppService> _logger;
@@ -36,6 +38,7 @@ public sealed class LeituraAppService : ILeituraAppService
         WaterLineDbContext db,
         IDiagnosticoService diagnostico,
         IAberturaChamadoService aberturaChamado,
+        IDespachoAppService despacho,
         RegrasDiagnosticoOptions regrasDiagnostico,
         TimeProvider relogio,
         ILogger<LeituraAppService> logger)
@@ -43,6 +46,7 @@ public sealed class LeituraAppService : ILeituraAppService
         _db = db;
         _diagnostico = diagnostico;
         _aberturaChamado = aberturaChamado;
+        _despacho = despacho;
         _regrasDiagnostico = regrasDiagnostico;
         _relogio = relogio;
         _logger = logger;
@@ -94,6 +98,9 @@ public sealed class LeituraAppService : ILeituraAppService
         if (novoChamado is not null)
         {
             _db.Chamados.Add(novoChamado);
+
+            // O chamado novo ainda não tem Id; a designação é gravada junto, no mesmo SaveChanges.
+            await _despacho.DespacharAsync(new[] { new ChamadoComBoca(novoChamado, boca) }, cancellationToken);
         }
 
         await _db.SaveChangesAsync(cancellationToken);
@@ -119,7 +126,8 @@ public sealed class LeituraAppService : ILeituraAppService
             PercentualOcupacao = Math.Round(diagnostico.PercentualOcupacao, 2),
             VelocidadeSubidaCmPorMinuto = diagnostico.VelocidadeSubidaCmPorMinuto is { } v ? Math.Round(v, 2) : null,
             EntradaBloqueada = diagnostico.EntradaBloqueada,
-            ChamadoAbertoId = novoChamado?.Id
+            ChamadoAbertoId = novoChamado?.Id,
+            AgenteDesignadoId = novoChamado?.AgenteId
         };
     }
 }

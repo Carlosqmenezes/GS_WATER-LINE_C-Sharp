@@ -52,4 +52,7 @@ public sealed record LeituraProcessadaResponse
 
     /// <summary>Chamado aberto por esta leitura, se houver.</summary>
     public int? ChamadoAbertoId { get; init; }
+
+    /// <summary>Agente designado para o chamado aberto (null se ninguém do tipo certo estava no raio).</summary>
+    public int? AgenteDesignadoId { get; init; }
 }
