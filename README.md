@@ -76,7 +76,9 @@ docker compose up -d
 docker compose ps        # o serviço "postgres" deve aparecer como "healthy"
 ```
 
-O banco `waterline` fica em `localhost:5432` (usuário `waterline`, senha `waterline_dev`, **só para desenvolvimento**).
+O banco `waterline` fica em `127.0.0.1:5432` (usuário `waterline`, senha `waterline_dev`, **só para desenvolvimento**).
+
+> A connection string usa `127.0.0.1`, e não `localhost`, de propósito. Em alguns Windows, outro processo escuta em `::1:5432` (o IPv6 de `localhost`), e a conexão fica presa até dar timeout em vez de chegar ao container.
 
 ### 2. Aplicar as migrations
 

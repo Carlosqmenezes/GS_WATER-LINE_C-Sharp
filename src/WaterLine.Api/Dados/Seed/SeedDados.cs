@@ -31,9 +31,23 @@ public static class SeedDados
             return;
         }
 
-        db.BocasDeLobo.AddRange(CriarBocasDeLobo());
-        db.Agentes.AddRange(CriarAgentes());
-        await db.SaveChangesAsync(cancellationToken);
+        // Grava um registro por vez: o EF Core não garante a ordem dos inserts dentro de um mesmo
+        // SaveChanges, e o README depende dos Ids (bocas 1 a 5; garis 1 a 3; equipes de galeria 4 e 5).
+        await using var transacao = await db.Database.BeginTransactionAsync(cancellationToken);
+
+        foreach (var boca in CriarBocasDeLobo())
+        {
+            db.BocasDeLobo.Add(boca);
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        foreach (var agente in CriarAgentes())
+        {
+            db.Agentes.Add(agente);
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        await transacao.CommitAsync(cancellationToken);
 
         logger.LogInformation("Seed concluído: bocas de lobo e agentes fictícios criados.");
     }

@@ -30,7 +30,7 @@ public sealed class TratamentoErrosHandler : IExceptionHandler
             DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, "Conflito de concorrência",
                 "O registro foi alterado por outra operação ao mesmo tempo. Recarregue e tente novamente."),
             BadHttpRequestException e => (e.StatusCode, "Requisição inválida", e.Message),
-            ArgumentException e => (StatusCodes.Status400BadRequest, "Dados inválidos", e.Message),
+            ArgumentException e => (StatusCodes.Status400BadRequest, "Dados inválidos", MensagemSemParametro(e)),
             OperationCanceledException => (499, "Requisição cancelada", "A requisição foi cancelada pelo cliente."),
             _ => (StatusCodes.Status500InternalServerError, "Erro interno", "Ocorreu um erro inesperado. Tente novamente mais tarde.")
         };
@@ -58,5 +58,16 @@ public sealed class TratamentoErrosHandler : IExceptionHandler
                 Instance = httpContext.Request.Path
             }
         });
+    }
+
+    /// <summary>
+    /// Remove o sufixo técnico que o .NET acrescenta às mensagens de ArgumentException
+    /// (" (Parameter 'x')" e, no ArgumentOutOfRangeException, "Actual value was ...").
+    /// </summary>
+    private static string MensagemSemParametro(ArgumentException excecao)
+    {
+        var mensagem = excecao.Message;
+        var indice = mensagem.IndexOf(" (Parameter '", StringComparison.Ordinal);
+        return indice >= 0 ? mensagem[..indice] : mensagem;
     }
 }
