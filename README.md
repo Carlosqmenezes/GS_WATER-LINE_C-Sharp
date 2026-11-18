@@ -296,6 +296,40 @@ Os agentes do seed são `GAR-0001` a `GAR-0003` (garis, Ids 1 a 3) e `GAL-0001` 
 
 ---
 
+## Evidências (prints do Swagger)
+
+Capturados com a API rodando localmente, com os dados fictícios do seed. Os prints ficam em [`docs/prints`](docs/prints).
+
+**Visão geral da documentação**, com todas as rotas e o botão **Authorize**:
+
+![Swagger: visão geral](docs/prints/01-swagger-visao-geral.png)
+
+**1. Login do gari** (`POST /auth/login` → 200 com o token JWT):
+
+![POST /auth/login](docs/prints/02-post-auth-login.png)
+
+**2. Leitura do sensor com a entrada tampada** (`POST /leituras` → 201): o diagnóstico é `EntradaBloqueada`, um chamado é aberto e o gari mais próximo em serviço é designado.
+
+![POST /leituras com entrada bloqueada](docs/prints/03-post-leituras-entrada-bloqueada.png)
+
+**3. Chamados próximos do gari** (`GET /chamados/proximos`, rota protegida → 200): ordenados por prioridade e distância, calculada pela fórmula de Haversine.
+
+![GET /chamados/proximos](docs/prints/04-get-chamados-proximos.png)
+
+**4. Previsão de chuva forte vinda do ML** (`POST /previsoes` → 201): prioridades elevadas e chamados preventivos criados.
+
+![POST /previsoes](docs/prints/05-post-previsoes.png)
+
+**5. Alertas gerados pela chuva** (`GET /alertas` → 200): alerta precoce (água subindo) e emergência (nível crítico).
+
+![GET /alertas](docs/prints/06-get-alertas.png)
+
+**6. Validação de entrada** (`POST /leituras` com dados inválidos → 400 em ProblemDetails, com os campos que falharam):
+
+![Validação 400](docs/prints/07-validacao-400.png)
+
+---
+
 ## Endpoints
 
 Todos os endpoints são assíncronos, recebem e devolvem DTOs, e os erros seguem o padrão **ProblemDetails** (RFC 7807).
