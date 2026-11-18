@@ -13,6 +13,20 @@ O WaterLine monitora bocas de lobo em São Paulo para reduzir alagamentos. Cada 
 
 Todos os dados do seed são **fictícios**: nenhum nome, matrícula ou endereço é real.
 
+## Ficha da CitizenTech
+
+| Campo | Conteúdo |
+| --- | --- |
+| Nome da CitizenTech | WaterLine |
+| Cidade e bairro | São Paulo, Centro (Sé/República) – Vale do Anhangabaú e Terminal Bandeira. Na chuva de 14/10/2026, o Túnel do Anhangabaú e o Terminal Bandeira alagaram, com carros boiando ([Agência Brasil](https://agenciabrasil.ebc.com.br/meio-ambiente/noticia/2026-10/chuva-alaga-ruas-do-centro-e-deixa-um-morto-na-zona-norte-de-sao-paulo), [TMC](https://tmc.com.br/brasil/chuva-sp-alaga-terminal-bandeira-metro-trianon-alertas/)). |
+| Cidadão beneficiado | Morador e pequeno comerciante de rua com alagamento recorrente; gari e equipe de galeria como agentes públicos |
+| Problema, em uma frase | Bocas de lobo entupidas transformam chuva comum em alagamento, e a limpeza e o aviso chegam tarde porque ninguém sabe a tempo onde agir. |
+| Como funciona | Sensores na boca de lobo detectam entupimento externo e interno e a água subindo; o ML prevê chuva forte; a API despacha o agente certo mais próximo e alerta moradores e a central. |
+| O que cada parte faz | ESP32 mede e diagnostica; **API C# decide prioridade e despacho**; app do gari recebe e fecha chamados com foto; ML prevê chuva forte com dados do INMET; módulo de segurança protege localização e fotos; Linux hospeda API e painel; Azure Boards organiza features e testes. |
+| Link do repositório | https://github.com/Carlosqmenezes/Water-Line_GS_C-Sharp (API) e https://github.com/Carlosqmenezes/Water-Line_GS-MOBILE (app) |
+| Indicador de impacto | Tempo entre a detecção e a limpeza; % de bocas de lobo prioritárias verificadas antes de chuva forte; minutos de antecedência entre o alerta e o nível crítico. |
+| ODS conectados | 11, 13, 9, 3 e 8 (trabalho decente: a localização do trabalhador só é usada em serviço) |
+
 ## Integrantes
 
 | Nome | RM |
