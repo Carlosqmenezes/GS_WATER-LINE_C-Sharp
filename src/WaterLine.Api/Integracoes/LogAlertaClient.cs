@@ -3,10 +3,6 @@ using WaterLine.Domain.Interfaces;
 
 namespace WaterLine.Api.Integracoes;
 
-/// <summary>
-/// Implementação usada quando Alertas:BaseUrl não está configurada: só registra o alerta em log.
-/// Permite rodar a API sem o serviço de alertas no ar.
-/// </summary>
 public sealed class LogAlertaClient : IAlertaClient
 {
     private readonly ILogger<LogAlertaClient> _logger;

@@ -5,10 +5,6 @@ using WaterLine.Domain.Excecoes;
 
 namespace WaterLine.Api.Erros;
 
-/// <summary>
-/// Converte as exceções em respostas ProblemDetails (RFC 7807) com o status HTTP adequado.
-/// Erros inesperados viram 500 com mensagem genérica, sem expor detalhes internos.
-/// </summary>
 public sealed class TratamentoErrosHandler : IExceptionHandler
 {
     private readonly IProblemDetailsService _problemDetailsService;
@@ -24,6 +20,8 @@ public sealed class TratamentoErrosHandler : IExceptionHandler
     {
         var (status, titulo, detalhe) = exception switch
         {
+            CredenciaisInvalidasException e => (StatusCodes.Status401Unauthorized, "Login recusado", e.Message),
+            AcessoNegadoException e => (StatusCodes.Status403Forbidden, "Acesso negado", e.Message),
             RecursoNaoEncontradoException e => (StatusCodes.Status404NotFound, "Recurso não encontrado", e.Message),
             ConflitoException e => (StatusCodes.Status409Conflict, "Conflito com o estado atual", e.Message),
             RegraNegocioException e => (StatusCodes.Status422UnprocessableEntity, "Regra de negócio violada", e.Message),
@@ -60,10 +58,6 @@ public sealed class TratamentoErrosHandler : IExceptionHandler
         });
     }
 
-    /// <summary>
-    /// Remove o sufixo técnico que o .NET acrescenta às mensagens de ArgumentException
-    /// (" (Parameter 'x')" e, no ArgumentOutOfRangeException, "Actual value was ...").
-    /// </summary>
     private static string MensagemSemParametro(ArgumentException excecao)
     {
         var mensagem = excecao.Message;

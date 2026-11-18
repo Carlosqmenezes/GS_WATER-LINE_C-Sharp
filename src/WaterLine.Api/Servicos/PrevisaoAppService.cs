@@ -106,10 +106,6 @@ public sealed class PrevisaoAppService : IPrevisaoAppService
         };
     }
 
-    /// <summary>
-    /// Histórico de entupimento: boca de lobo ativa cujo status atual é de entupimento, ou que teve,
-    /// na janela configurada, alguma leitura com entrada bloqueada ou com sedimento sem chuva.
-    /// </summary>
     private async Task<List<BocaDeLobo>> BuscarBocasComHistoricoAsync(DateTime agora, CancellationToken cancellationToken)
     {
         var desde = agora.AddDays(-_regrasPrevencao.DiasHistoricoEntupimento);

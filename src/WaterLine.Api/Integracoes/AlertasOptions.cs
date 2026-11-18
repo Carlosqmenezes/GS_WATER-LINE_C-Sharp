@@ -16,10 +16,6 @@ public sealed class AlertasOptions : IValidatableObject
     [Range(1, 60)]
     public int TimeoutSegundos { get; set; } = 5;
 
-    /// <summary>
-    /// Intervalo mínimo, em minutos, entre dois alertas do mesmo nível para a mesma boca de lobo,
-    /// para não disparar um aviso a cada leitura durante a chuva.
-    /// </summary>
     [Range(0, 240)]
     public int IntervaloMinimoMinutos { get; set; } = 10;
 

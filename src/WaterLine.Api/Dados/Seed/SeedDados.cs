@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WaterLine.Domain.Entidades;
 
@@ -14,7 +15,12 @@ namespace WaterLine.Api.Dados.Seed;
 /// </remarks>
 public static class SeedDados
 {
-    public static async Task ExecutarAsync(WaterLineDbContext db, ILogger logger, CancellationToken cancellationToken = default)
+    public static async Task ExecutarAsync(
+        WaterLineDbContext db,
+        ILogger logger,
+        IPasswordHasher<Agente> hasher,
+        string? senhaDemonstracao,
+        CancellationToken cancellationToken = default)
     {
         var migracoesPendentes = await db.Database.GetPendingMigrationsAsync(cancellationToken);
         if (migracoesPendentes.Any())
@@ -28,8 +34,17 @@ public static class SeedDados
         if (await db.BocasDeLobo.AnyAsync(cancellationToken) || await db.Agentes.AnyAsync(cancellationToken))
         {
             logger.LogInformation("Seed ignorado: o banco já possui dados.");
-            return;
         }
+        else
+        {
+            await CriarDadosIniciaisAsync(db, logger, cancellationToken);
+        }
+
+        await DefinirSenhasDeDemonstracaoAsync(db, logger, hasher, senhaDemonstracao, cancellationToken);
+    }
+
+    private static async Task CriarDadosIniciaisAsync(WaterLineDbContext db, ILogger logger, CancellationToken cancellationToken)
+    {
 
         // Grava um registro por vez: o EF Core não garante a ordem dos inserts dentro de um mesmo
         // SaveChanges, e o README depende dos Ids (bocas 1 a 5; garis 1 a 3; equipes de galeria 4 e 5).
@@ -50,6 +65,40 @@ public static class SeedDados
         await transacao.CommitAsync(cancellationToken);
 
         logger.LogInformation("Seed concluído: bocas de lobo e agentes fictícios criados.");
+    }
+
+    /// <summary>
+    /// Dá a senha de demonstração (Seed:SenhaDemonstracao) aos agentes que ainda não têm senha.
+    /// Também cobre bancos criados antes de existir o login. Só o hash é gravado.
+    /// </summary>
+    private static async Task DefinirSenhasDeDemonstracaoAsync(
+        WaterLineDbContext db,
+        ILogger logger,
+        IPasswordHasher<Agente> hasher,
+        string? senhaDemonstracao,
+        CancellationToken cancellationToken)
+    {
+        var semSenha = await db.Agentes.Where(a => a.SenhaHash == string.Empty).ToListAsync(cancellationToken);
+        if (semSenha.Count == 0)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(senhaDemonstracao))
+        {
+            logger.LogWarning(
+                "{Quantidade} agente(s) sem senha: configure Seed:SenhaDemonstracao para que consigam entrar no app.",
+                semSenha.Count);
+            return;
+        }
+
+        foreach (var agente in semSenha)
+        {
+            agente.DefinirSenhaHash(hasher.HashPassword(agente, senhaDemonstracao));
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Senha de demonstração definida para {Quantidade} agente(s).", semSenha.Count);
     }
 
     /// <summary>

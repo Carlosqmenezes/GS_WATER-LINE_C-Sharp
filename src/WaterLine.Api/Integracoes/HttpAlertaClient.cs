@@ -5,10 +5,6 @@ using WaterLine.Domain.Interfaces;
 
 namespace WaterLine.Api.Integracoes;
 
-/// <summary>
-/// Envia os alertas ao serviço de alertas (SOA) por HTTP:
-/// alerta precoce em POST /alertas e emergência em POST /alertas/emergencia.
-/// </summary>
 public sealed class HttpAlertaClient : IAlertaClient
 {
     private readonly HttpClient _http;
@@ -47,7 +43,6 @@ public sealed class HttpAlertaClient : IAlertaClient
         }
     }
 
-    /// <summary>Contrato enviado ao serviço de alertas. Contém só dados da boca de lobo (infraestrutura pública).</summary>
     private sealed record AlertaExternoPayload(
         int AlertaId,
         int BocaDeLoboId,

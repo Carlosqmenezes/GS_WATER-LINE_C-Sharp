@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Testes unitários das regras de negócio do domínio. -->
+  <!-- Testes unitários das regras de negócio do domínio e do token de login. -->
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -24,6 +24,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\WaterLine.Domain\WaterLine.Domain.csproj" />
+    <!-- Necessário para testar a emissão do token JWT, que fica na camada de API. -->
+    <ProjectReference Include="..\..\src\WaterLine.Api\WaterLine.Api.csproj" />
   </ItemGroup>
 
 </Project>

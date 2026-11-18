@@ -49,6 +49,13 @@ namespace WaterLine.Api.Dados.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
 
+                    b.Property<string>("SenhaHash")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasDefaultValue("");
+
                     b.Property<string>("TipoAgente")
                         .IsRequired()
                         .HasMaxLength(20)

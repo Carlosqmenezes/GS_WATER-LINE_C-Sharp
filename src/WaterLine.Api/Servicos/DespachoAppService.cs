@@ -8,10 +8,6 @@ namespace WaterLine.Api.Servicos;
 /// <summary>Busca os agentes disponíveis e aplica a regra de despacho do domínio.</summary>
 public interface IDespachoAppService
 {
-    /// <summary>
-    /// Designa o agente mais próximo para cada chamado aberto e sem agente. As alterações ficam
-    /// no DbContext e são gravadas pelo chamador, na mesma transação da operação que criou os chamados.
-    /// </summary>
     Task<IReadOnlyList<Designacao>> DespacharAsync(IReadOnlyCollection<ChamadoComBoca> chamados, CancellationToken cancellationToken);
 }
 

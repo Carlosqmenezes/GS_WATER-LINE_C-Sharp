@@ -26,11 +26,13 @@ public class AgenteConfiguration : IEntityTypeConfiguration<Agente>
         builder.Property(a => a.Nome).HasMaxLength(Agente.TamanhoMaximoNome).IsRequired();
         builder.Property(a => a.Matricula).HasMaxLength(Agente.TamanhoMaximoMatricula).IsRequired();
         builder.HasIndex(a => a.Matricula).IsUnique();
+        builder.Property(a => a.SenhaHash).HasMaxLength(Agente.TamanhoMaximoSenhaHash).IsRequired().HasDefaultValue(string.Empty);
 
         // Propriedades calculadas (polimorfismo e regras), não são colunas.
         builder.Ignore(a => a.TiposDeChamadoAtendidos);
         builder.Ignore(a => a.Funcao);
         builder.Ignore(a => a.TemLocalizacao);
+        builder.Ignore(a => a.TemSenha);
 
         builder.HasMany(a => a.Chamados)
             .WithOne(c => c.Agente)

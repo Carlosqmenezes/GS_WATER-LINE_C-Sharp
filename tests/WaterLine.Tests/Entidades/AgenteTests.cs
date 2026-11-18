@@ -57,6 +57,35 @@ public class AgenteTests
     }
 
     [Fact]
+    public void NovoAgente_ComecaSemSenha()
+    {
+        var gari = new Gari("Gari Teste", "GAR-T001");
+
+        Assert.False(gari.TemSenha);
+    }
+
+    [Fact]
+    public void DefinirSenhaHash_GuardaOHashENaoOExpoeNoToString()
+    {
+        var gari = Fabrica.GariEmServico(7);
+
+        gari.DefinirSenhaHash("hash-ficticio-de-teste");
+
+        Assert.True(gari.TemSenha);
+        Assert.DoesNotContain("hash-ficticio-de-teste", gari.ToString());
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void DefinirSenhaHash_Vazio_LancaArgumentException(string hash)
+    {
+        var gari = new Gari("Gari Teste", "GAR-T001");
+
+        Assert.Throws<ArgumentException>(() => gari.DefinirSenhaHash(hash));
+    }
+
+    [Fact]
     public void Haversine_UmMilesimoDeGrauDeLatitude_DaCercaDe111Metros()
     {
         var distancia = Haversine.DistanciaEmMetros(-23.550, -46.640, -23.551, -46.640);

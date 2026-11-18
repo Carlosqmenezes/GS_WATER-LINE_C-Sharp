@@ -17,10 +17,6 @@ public sealed class PrevisoesController : ControllerBase
         _service = service;
     }
 
-    /// <summary>
-    /// Registra uma previsão. Com chuva forte prevista, eleva a prioridade dos chamados ativos
-    /// e cria chamados preventivos para as bocas de lobo com histórico de entupimento.
-    /// </summary>
     /// <param name="request">Horizonte, probabilidade e decisão de chuva forte.</param>
     /// <param name="cancellationToken">Cancelamento da requisição.</param>
     /// <response code="201">Previsão registrada e camada de prevenção aplicada.</response>

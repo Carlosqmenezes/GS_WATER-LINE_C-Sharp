@@ -1,9 +1,9 @@
 namespace WaterLine.Api.Armazenamento;
 
-/// <summary>
+
 /// Guarda as fotos em disco, numa pasta por chamado, com nome gerado pelo servidor
-/// (o nome original do arquivo é descartado para evitar caminhos maliciosos).
-/// </summary>
+
+
 public sealed class ArmazenamentoFotosLocal : IArmazenamentoFotos
 {
     private static readonly IReadOnlyDictionary<string, string> ExtensaoPorTipo = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -73,7 +73,7 @@ public sealed class ArmazenamentoFotosLocal : IArmazenamentoFotos
     {
         var caminhoCompleto = Path.GetFullPath(Path.Combine(_pastaRaiz, caminhoRelativo));
 
-        // Defesa contra caminhos fora da pasta de fotos.
+     
         if (!caminhoCompleto.StartsWith(_pastaRaiz + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
         {
             return;

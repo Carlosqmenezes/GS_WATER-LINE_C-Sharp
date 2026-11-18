@@ -1,22 +1,26 @@
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using WaterLine.Api.Armazenamento;
+using WaterLine.Api.Autenticacao;
 using WaterLine.Api.Integracoes;
 using WaterLine.Api.Servicos;
 using WaterLine.Domain.Configuracoes;
+using WaterLine.Domain.Entidades;
 using WaterLine.Domain.Interfaces;
 using WaterLine.Domain.Servicos;
 
 namespace WaterLine.Api.Configuracao;
 
-/// <summary>
-/// Registro de todas as dependências da aplicação, para manter o Program.cs enxuto.
-/// </summary>
+
 public static class InjecaoDependencia
 {
-    /// <summary>
-    /// Regras de negócio do domínio. Os serviços de domínio não guardam estado e por isso são singletons.
-    /// Os parâmetros vêm do appsettings.json e são validados na inicialização.
-    /// </summary>
+    public const string PoliticaLimiteLogin = "login";
+
+    private const int TentativasDeLoginPorMinuto = 10;
+
     public static IServiceCollection AddRegrasDeNegocio(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton(TimeProvider.System);
@@ -34,7 +38,6 @@ public static class InjecaoDependencia
         return services;
     }
 
-    /// <summary>Integrações de infraestrutura: armazenamento das fotos e serviço externo de alertas.</summary>
     public static IServiceCollection AddInfraestrutura(this IServiceCollection services, IConfiguration configuration)
     {
         AdicionarOpcoes<ArmazenamentoFotosOptions>(services, configuration, ArmazenamentoFotosOptions.Secao);
@@ -60,7 +63,49 @@ public static class InjecaoDependencia
         return services;
     }
 
-    /// <summary>Casos de uso da API (um por recurso). Usam o DbContext, por isso são scoped.</summary>
+    public static IServiceCollection AddAutenticacao(this IServiceCollection services, IConfiguration configuration)
+    {
+        AdicionarOpcoes<JwtOptions>(services, configuration, JwtOptions.Secao);
+
+        services.AddSingleton<IPasswordHasher<Agente>, PasswordHasher<Agente>>();
+        services.AddSingleton<ITokenService, TokenService>();
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+
+        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<JwtOptions>((bearer, jwt) =>
+            {
+                bearer.MapInboundClaims = false;
+                bearer.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwt.Emissor,
+                    ValidateAudience = true,
+                    ValidAudience = jwt.Audiencia,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = TokenService.CriarChave(jwt),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromMinutes(1)
+                };
+            });
+
+        services.AddAuthorization();
+
+        services.AddRateLimiter(limitador =>
+        {
+            limitador.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            limitador.AddPolicy(PoliticaLimiteLogin, contexto => RateLimitPartition.GetFixedWindowLimiter(
+                contexto.Connection.RemoteIpAddress?.ToString() ?? "desconhecido",
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = TentativasDeLoginPorMinuto,
+                    Window = TimeSpan.FromMinutes(1)
+                }));
+        });
+
+        return services;
+    }
+
     public static IServiceCollection AddServicosDeAplicacao(this IServiceCollection services)
     {
         services.AddScoped<IBocaDeLoboAppService, BocaDeLoboAppService>();
@@ -68,16 +113,13 @@ public static class InjecaoDependencia
         services.AddScoped<IDespachoAppService, DespachoAppService>();
         services.AddScoped<IChamadoAppService, ChamadoAppService>();
         services.AddScoped<IAgenteAppService, AgenteAppService>();
+        services.AddScoped<IAutenticacaoAppService, AutenticacaoAppService>();
         services.AddScoped<IPrevisaoAppService, PrevisaoAppService>();
         services.AddScoped<IAlertaAppService, AlertaAppService>();
 
         return services;
     }
 
-    /// <summary>
-    /// Associa a seção do appsettings à classe de opções, valida na inicialização e registra
-    /// a instância pronta, para que o domínio não dependa de IOptions.
-    /// </summary>
     private static void AdicionarOpcoes<TOpcoes>(IServiceCollection services, IConfiguration configuration, string secao)
         where TOpcoes : class
     {

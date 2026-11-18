@@ -54,8 +54,6 @@ public sealed class ChamadoAppService : IChamadoAppService
         double longitude,
         CancellationToken cancellationToken)
     {
-        // Pré-filtro no banco por uma caixa ao redor do ponto; a distância exata (Haversine)
-        // e a ordenação por prioridade e distância ficam no domínio.
         var caixa = Haversine.CaixaAoRedor(latitude, longitude, _despacho.RaioMetros);
 
         var candidatos = await _db.Chamados

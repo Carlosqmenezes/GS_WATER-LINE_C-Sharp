@@ -1,11 +1,14 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using WaterLine.Api.Configuracao;
 using WaterLine.Api.Dados;
 using WaterLine.Api.Dados.Seed;
 using WaterLine.Api.Erros;
+using WaterLine.Domain.Entidades;
 
 // Ponto de entrada da API WaterLine.
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +26,7 @@ builder.Services.AddDbContext<WaterLineDbContext>(options => options.UseNpgsql(c
 // ---------- Regras de negócio e serviços de aplicação ----------
 builder.Services.AddRegrasDeNegocio(builder.Configuration);
 builder.Services.AddInfraestrutura(builder.Configuration);
+builder.Services.AddAutenticacao(builder.Configuration);
 builder.Services.AddServicosDeAplicacao();
 
 // ---------- Web API ----------
@@ -46,6 +50,20 @@ builder.Services.AddSwaggerGen(options =>
 
     var arquivoXml = Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
     options.IncludeXmlComments(arquivoXml);
+
+    // Botão "Authorize" do Swagger: cole o token devolvido por POST /auth/login.
+    var esquemaBearer = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "Token JWT devolvido por POST /auth/login. Cole apenas o token, sem a palavra Bearer.",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        BearerFormat = "JWT",
+        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = JwtBearerDefaults.AuthenticationScheme }
+    };
+    options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, esquemaBearer);
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement { [esquemaBearer] = Array.Empty<string>() });
 });
 
 var app = builder.Build();
@@ -68,10 +86,12 @@ if (app.Configuration.GetValue("Seed:Habilitado", false))
     await using var escopo = app.Services.CreateAsyncScope();
     var db = escopo.ServiceProvider.GetRequiredService<WaterLineDbContext>();
     var logger = escopo.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Seed");
+    var hasher = escopo.ServiceProvider.GetRequiredService<IPasswordHasher<Agente>>();
+    var senhaDemonstracao = app.Configuration["Seed:SenhaDemonstracao"];
 
     try
     {
-        await SeedDados.ExecutarAsync(db, logger);
+        await SeedDados.ExecutarAsync(db, logger, hasher, senhaDemonstracao);
     }
     catch (Exception ex) when (ex is Npgsql.NpgsqlException or InvalidOperationException or TimeoutException)
     {
@@ -79,6 +99,10 @@ if (app.Configuration.GetValue("Seed:Habilitado", false))
         logger.LogError(ex, "Não foi possível conectar ao PostgreSQL para o seed. Suba o banco com 'docker compose up -d' (veja o README).");
     }
 }
+
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

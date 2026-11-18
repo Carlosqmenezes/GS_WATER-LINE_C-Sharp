@@ -4,7 +4,6 @@ using WaterLine.Api.Servicos;
 
 namespace WaterLine.Api.Controllers;
 
-/// <summary>Cadastro das bocas de lobo monitoradas.</summary>
 [ApiController]
 [Route("bocas-de-lobo")]
 [Produces("application/json")]

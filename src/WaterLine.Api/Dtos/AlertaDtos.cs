@@ -3,7 +3,6 @@ using WaterLine.Domain.Enums;
 
 namespace WaterLine.Api.Dtos;
 
-/// <summary>Alerta devolvido pela API.</summary>
 public sealed record AlertaResponse(
     int Id,
     int BocaDeLoboId,

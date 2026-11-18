@@ -17,10 +17,6 @@ public sealed class LeiturasController : ControllerBase
         _service = service;
     }
 
-    /// <summary>
-    /// Registra uma leitura, diagnostica a boca de lobo e dispara as ações necessárias
-    /// (chamado de limpeza, cancelamento por chuva ou alerta).
-    /// </summary>
     /// <param name="request">Distâncias dos dois sensores e o indicador de chuva.</param>
     /// <param name="cancellationToken">Cancelamento da requisição.</param>
     /// <response code="201">Leitura registrada e diagnosticada.</response>

@@ -11,26 +11,13 @@ using WaterLine.Domain.Servicos;
 
 namespace WaterLine.Api.Servicos;
 
-/// <summary>Processa as leituras enviadas pelos ESP32.</summary>
 public interface ILeituraAppService
 {
     Task<LeituraProcessadaResponse> RegistrarAsync(LeituraRequest request, CancellationToken cancellationToken);
 }
 
-/// <summary>
-/// Orquestra o processamento de uma leitura, na ordem:
-/// <list type="number">
-/// <item>diagnóstico e atualização do status da boca de lobo;</item>
-/// <item>cancelamento dos chamados de gari se estiver chovendo (segurança do trabalhador);</item>
-/// <item>abertura e despacho do chamado de limpeza, se o diagnóstico exigir;</item>
-/// <item>registro do alerta (água subindo ou nível crítico);</item>
-/// <item>gravação de tudo numa única transação e, depois, envio do alerta ao serviço externo.</item>
-/// </list>
-/// As regras de negócio ficam nos serviços do domínio; aqui só se carrega, orquestra e grava.
-/// </summary>
 public sealed class LeituraAppService : ILeituraAppService
 {
-    /// <summary>Tolerância para relógios de dispositivos levemente adiantados.</summary>
     private static readonly TimeSpan ToleranciaFuturo = TimeSpan.FromMinutes(5);
 
     private readonly WaterLineDbContext _db;
@@ -92,7 +79,6 @@ public sealed class LeituraAppService : ILeituraAppService
             request.DistanciaInternaCm!.Value,
             request.Chovendo!.Value);
 
-        // 1) Diagnóstico.
         var historico = await CarregarHistoricoAsync(boca.Id, dataHora, cancellationToken);
         var diagnostico = _diagnostico.Diagnosticar(boca, leitura, historico);
         boca.AtualizarStatus(diagnostico.Tipo);
@@ -103,10 +89,8 @@ public sealed class LeituraAppService : ILeituraAppService
                         && (c.Status == StatusChamado.Aberto || c.Status == StatusChamado.Aceito))
             .ToListAsync(cancellationToken);
 
-        // 2) Segurança do trabalhador: chovendo, os chamados de gari desta boca de lobo são cancelados.
         var cancelados = _segurancaTrabalhador.CancelarChamadosDeGariPorChuva(leitura, chamadosAtivos);
 
-        // 3) Abertura e despacho do chamado de limpeza.
         var novoChamado = _aberturaChamado.AvaliarAbertura(boca, diagnostico, leitura.Chovendo, chamadosAtivos, agora);
         if (novoChamado is not null)
         {
@@ -114,18 +98,14 @@ public sealed class LeituraAppService : ILeituraAppService
             await _despacho.DespacharAsync(new[] { new ChamadoComBoca(novoChamado, boca) }, cancellationToken);
         }
 
-        // 4) Alerta para moradores (água subindo) ou para a central (nível crítico).
         var alerta = diagnostico.GeraAlerta
             ? await CriarAlertaSeNecessarioAsync(boca, diagnostico.Tipo, agora, cancellationToken)
             : null;
 
-        // 5) Uma única gravação para leitura, status, cancelamentos, chamado e alerta.
         await _db.SaveChangesAsync(cancellationToken);
 
         RegistrarLog(leitura, boca, diagnostico.Tipo, cancelados, novoChamado, alerta);
 
-        // O envio acontece depois de gravar: o alerta fica registrado mesmo se o serviço externo falhar.
-        // CancellationToken.None: o alerta deve sair mesmo que o dispositivo encerre a conexão.
         bool? alertaEnviado = alerta is null
             ? null
             : await _alertaClient.EnviarAsync(alerta, boca, CancellationToken.None);
@@ -148,10 +128,6 @@ public sealed class LeituraAppService : ILeituraAppService
         };
     }
 
-    /// <summary>
-    /// Leituras anteriores numa janela do dobro do tempo exigido para tubo entupido:
-    /// basta para medir a água parada e encontrar a leitura anterior (velocidade de subida).
-    /// </summary>
     private async Task<List<Leitura>> CarregarHistoricoAsync(int bocaDeLoboId, DateTime dataHora, CancellationToken cancellationToken)
     {
         var inicioJanela = dataHora.AddHours(-2 * _regrasDiagnostico.HorasAguaParadaTubo);
@@ -163,10 +139,6 @@ public sealed class LeituraAppService : ILeituraAppService
             .ToListAsync(cancellationToken);
     }
 
-    /// <summary>
-    /// Cria o alerta, a menos que já exista um do mesmo nível para a mesma boca de lobo
-    /// dentro do intervalo mínimo (evita um aviso a cada leitura durante a chuva).
-    /// </summary>
     private async Task<Alerta?> CriarAlertaSeNecessarioAsync(
         BocaDeLobo boca,
         TipoDiagnostico diagnostico,

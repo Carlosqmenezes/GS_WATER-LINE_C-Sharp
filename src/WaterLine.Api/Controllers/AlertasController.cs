@@ -6,7 +6,6 @@ using WaterLine.Domain.Enums;
 
 namespace WaterLine.Api.Controllers;
 
-/// <summary>Alertas de água subindo (alerta precoce) e de nível crítico (emergência).</summary>
 [ApiController]
 [Route("alertas")]
 [Produces("application/json")]

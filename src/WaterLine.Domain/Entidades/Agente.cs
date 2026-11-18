@@ -10,13 +10,14 @@ namespace WaterLine.Domain.Entidades;
 /// </summary>
 /// <remarks>
 /// Privacidade do trabalhador: a localização só existe enquanto o agente está em serviço
-/// e é apagada quando ele sai. Nome, matrícula e localização nunca aparecem em
+/// e é apagada quando ele sai. Nome, matrícula, senha e localização nunca aparecem em
 /// <see cref="ToString"/> para não vazarem em logs.
 /// </remarks>
 public abstract class Agente : EntidadeBase
 {
     public const int TamanhoMaximoNome = 120;
     public const int TamanhoMaximoMatricula = 20;
+    public const int TamanhoMaximoSenhaHash = 256;
 
     private readonly List<Chamado> _chamados = new();
 
@@ -25,18 +26,29 @@ public abstract class Agente : EntidadeBase
     {
         Nome = string.Empty;
         Matricula = string.Empty;
+        SenhaHash = string.Empty;
     }
 
     protected Agente(string nome, string matricula)
     {
         Nome = Validacao.TextoObrigatorio(nome, nameof(Nome), TamanhoMaximoNome);
         Matricula = Validacao.TextoObrigatorio(matricula, nameof(Matricula), TamanhoMaximoMatricula).ToUpperInvariant();
+        SenhaHash = string.Empty;
         EmServico = false;
     }
 
     public string Nome { get; private set; }
 
     public string Matricula { get; private set; }
+
+    /// <summary>
+    /// Hash da senha de acesso ao app. A senha em si nunca é guardada: quem calcula o hash
+    /// é a camada de API. Vazio enquanto o agente não tem senha (e, portanto, não consegue entrar).
+    /// </summary>
+    public string SenhaHash { get; private set; }
+
+    /// <summary>Indica se o agente já tem senha definida.</summary>
+    public bool TemSenha => SenhaHash.Length > 0;
 
     public bool EmServico { get; private set; }
 
@@ -58,6 +70,12 @@ public abstract class Agente : EntidadeBase
     public bool TemLocalizacao => EmServico && Latitude.HasValue && Longitude.HasValue;
 
     public bool PodeAtender(TipoChamado tipo) => TiposDeChamadoAtendidos.Contains(tipo);
+
+    /// <summary>Guarda o hash da senha já calculado. Nunca recebe a senha em texto puro.</summary>
+    public void DefinirSenhaHash(string senhaHash)
+    {
+        SenhaHash = Validacao.TextoObrigatorio(senhaHash, nameof(SenhaHash), TamanhoMaximoSenhaHash);
+    }
 
     public void EntrarEmServico(double latitude, double longitude)
     {
