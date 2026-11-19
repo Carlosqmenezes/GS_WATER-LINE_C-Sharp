@@ -38,8 +38,8 @@ Todos os dados do seed são **fictícios**: nenhum nome, matrícula ou endereço
 
 | Parte | Repositório |
 | --- | --- |
-| API principal (C#), este repositório | https://github.com/Carlosqmenezes/Water-Line_GS_C-Sharp |
-| App do gari (Mobile, Expo) | https://github.com/Carlosqmenezes/Water-Line_GS-MOBILE |
+| API principal (C#), este repositório | [(https://github.com/Carlosqmenezes/GS_WATER-LINE_C-Sharp)](https://github.com/Carlosqmenezes/GS_WATER-LINE_C-Sharp) |
+| App do gari (Mobile, Expo) | [https://github.com/Carlosqmenezes/Water-Line_GS-MOBILE](https://github.com/Carlosqmenezes/GS_WATER-LINE_mobile) |
 
 O app do gari consome esta API: para testá-lo no celular, primeiro suba a API seguindo o passo a passo abaixo (incluindo a seção [Acesso pelo celular](#6-acesso-pelo-celular-app-do-gari)).
 
